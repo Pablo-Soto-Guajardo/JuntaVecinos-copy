@@ -1,0 +1,41 @@
+server:
+  port: 9090
+
+spring:
+  main:
+    web-application-type: reactive
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Misma clave con la que ms-admin firma los tokens (variable SECRET de docker-compose)
+          secret-key: ${SECRET:esta_es_mi_compleja_clave_secreta}
+
+  cloud:
+    gateway:
+      routes:
+
+        # Login y registro (públicos, no requieren token)
+        - id: ms-admin-auth
+          uri: http://ms-admin:9091
+          predicates:
+            - Path=/auth/**
+
+        # Datos de usuarios / perfil
+        - id: ms-admin-usuarios
+          uri: http://ms-admin:9091
+          predicates:
+            - Path=/usuarios/**
+
+        # Arriendo de dependencias
+        - id: ms-reservas
+          uri: http://ms-reservas:9092
+          predicates:
+            - Path=/reservas/**
+
+        # Ingresos, gastos y comprobantes
+        - id: ms-finanzas
+          uri: http://ms-finanzas:9093
+          predicates:
+            - Path=/movimientos/**

@@ -1,0 +1,48 @@
+# Junta de Vecinos Población Zaror - Backend de microservicios
+# 1) Encender MySQL (XAMPP / Laragon) en el puerto 3306, usuario root sin contraseña
+# 2) Ejecutar build-all.bat (genera los .jar)
+# 3) Ejecutar: docker compose up -d --build
+# La app móvil solo conoce al api-gateway (puerto 9090).
+
+x-common-env: &common-env
+  SECRET: "esta_es_mi_compleja_clave_secreta"
+
+services:
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "9090:9090"
+    environment:
+      <<: *common-env
+    depends_on:
+      - ms-admin
+      - ms-reservas
+      - ms-finanzas
+
+  ms-admin:
+    build: ./ms-admin
+    ports:
+      - "9091:9091"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ms-reservas:
+    build: ./ms-reservas
+    ports:
+      - "9092:9092"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ms-finanzas:
+    build: ./ms-finanzas
+    ports:
+      - "9093:9093"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
